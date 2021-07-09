@@ -1,8 +1,50 @@
 #include <GL/glew.h> // include this lib, before include the other opengl sources to not take an error.
 #include <GLFW/glfw3.h>
 #include <iostream>
-
+#include <fstream>
+#include <sstream>
 //this function takes a source and type as argument and compiles a shader from this source by given type.
+struct ShaderSource
+{
+    std::string vertexSource;
+    std::string fragmentSource;
+};
+
+static ShaderSource ParseShader(const std::string& filepath)
+{
+    std::fstream stream(filepath);
+
+    std::string line;
+
+    std::stringstream ss[2];
+
+    enum class ShaderType
+    {
+        NONE = -1, VERTEX = 0, FRAGMENT =1
+    };
+    ShaderType currentShader = ShaderType::NONE;
+
+    while (getline(stream, line))
+    {
+        if (line.find("#shader") != std::string::npos)
+        {
+            if (line.find("vertex") != std::string::npos)
+            {
+                currentShader = ShaderType::VERTEX;
+            }
+            else if (line.find("fragment") != std::string::npos)
+            {
+                currentShader = ShaderType::FRAGMENT;
+                
+            }
+        }
+        else
+        {
+            ss[(int)currentShader] << line << '\n';
+        }
+    }
+    return { ss[0].str(),ss[1].str() };
+}
 static unsigned int CompileShader(const std::string& source, unsigned int type)
 {
     unsigned int id = glCreateShader(type);
@@ -115,25 +157,10 @@ int main(void)
     glEnableVertexAttribArray(0); // we enable the vertex attribute. we need to do that.
     
     //writing and adding shader
-     std::string vertexShader =
-        "#version 330 core\n"
-        "\n"
-        "layout(location = 0) in vec4 position;"
-        "void main()\n"
-        "{\n"
-        "   gl_Position = position;\n"
-        "}\n";
-     std::string fragmentShader =
-        "#version 330 core\n"
-        "\n"
-        "layout(location = 0) out vec4 color;\n"
-        "void main()\n"
-        "{\n"
-        "   color = vec4(1.0, 0.0, 0.0, 1.0);\n"
-        "}\n";
-        unsigned int shader = CreateShader(vertexShader, fragmentShader); // create shader from a string shader sources..
-        glUseProgram(shader); // tell gpu use this program as shader.
-        
+    
+    ShaderSource source = ParseShader("res/shaders/Basic.shader");
+    unsigned int shader = CreateShader(source.vertexSource, source.fragmentSource); // create shader from a string shader sources..
+    glUseProgram(shader); // tell gpu use this program as shader.
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
