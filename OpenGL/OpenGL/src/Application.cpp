@@ -29,7 +29,7 @@ int main(void)
     float positions[6]{
         -0.5f,-0.5f, // 1th vertex pos,
          0.0f, 0.5f, // 2th vertex pos,
-         0.5f,-0.5f, // 3th vertex pos
+         0.5f,-0.5f, // 3th vertex pos,
     };
     unsigned int buffer;
     glGenBuffers(1, &buffer); // tell the gpu , generate a buffer with id of 1 .
