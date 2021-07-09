@@ -26,16 +26,23 @@ int main(void)
 
     std::cout << glGetString(GL_VERSION) << std::endl;
 
+    float positions[6]{
+        -0.5f,-0.5f,
+         0.0f, 0.5f,
+         0.5f,-0.5f,
+    };
+    unsigned int buffer;
+    glGenBuffers(1, &buffer); // tell the gpu , generate a buffer with id of 1 .
+    glBindBuffer(GL_ARRAY_BUFFER, 6* sizeof(float), positions, GL_STATIC_DRAW) // look at to docs.gl adress to take more info.
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
-        glBegin(GL_TRIANGLES);
-        glVertex2f(-0.5f , -0.5f);
-        glVertex2f(0.0f, 0.5f);
-        glVertex2f(0.5f, -0.5f);
-        glEnd();
+
+        glDrawArrays(GL_TRIANGLES, 0, 3); // start from 0th element and read 3 element. Thought like
+                                          // Every ordered position couple is a one vertice element.
+        
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
