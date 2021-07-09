@@ -1,6 +1,54 @@
 #include <GL/glew.h> // include this lib, before include the other opengl sources to not take an error.
 #include <GLFW/glfw3.h>
 #include <iostream>
+
+//this function takes a source and type as argument and compiles a shader from this source by given type.
+static unsigned int CompileShader(const std::string& source, unsigned int type)
+{
+    unsigned int id = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(id, 1, &src, nullptr); // add source code to tha shader source
+    glCompileShader(id); // compile sourced shader program
+
+
+    /* debugging and error checking stuffs.*/
+    int result;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+    if (result == GL_FALSE)
+    {
+        int length;
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+        char* message = (char*)alloca(sizeof(char) * length);//alloca gives a memory from stack dynamically :))
+        glGetShaderInfoLog(id, length, &length, message);
+        std::cout << "Failed to compiled" << ((type == GL_VERTEX_SHADER) ? "vertex" : "fragment") << " shader!" << std::endl;
+        std::cout << message << std::endl;
+        glDeleteShader(id);
+        return 0;
+    }
+    /* debugging and error checking stuffs finished.*/
+    return id;
+}
+
+static unsigned int CreateShader(const std::string& vertexSource, const std::string& fragmentSource)
+{
+    unsigned int program = glCreateProgram(); // request a free program from gpu returns the id of the program
+
+    unsigned int vs = CompileShader(vertexSource, GL_VERTEX_SHADER);  //returns compiled shader programs id
+    unsigned int fs = CompileShader(fragmentSource, GL_FRAGMENT_SHADER);
+
+    glAttachShader(program, vs); // attach shaders to free program
+    glAttachShader(program, fs);
+
+    glLinkProgram(program); // link the objects of program
+
+    glValidateProgram(program); // validate the program for gpu
+
+    glDeleteShader(vs); // delete intermediate files...
+    glDeleteShader(fs);
+
+    return program;
+}
+
 int main(void)
 {
     GLFWwindow* window;
@@ -34,7 +82,7 @@ int main(void)
     unsigned int buffer;
     glGenBuffers(1, &buffer); // tell the gpu , generate a buffer with id of 1 .
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW) // look at to docs.gl adress to take more info.
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW); // look at to docs.gl adress to take more info.
 
     glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE, sizeof(float) * 2, 0); 
     // detailly  told in http://docs.gl/gl4/glVertexAttribPointer
@@ -65,6 +113,27 @@ int main(void)
     */
 
     glEnableVertexAttribArray(0); // we enable the vertex attribute. we need to do that.
+    
+    //writing and adding shader
+     std::string vertexShader =
+        "#version 330 core\n"
+        "\n"
+        "layout(location = 0) in vec4 position;"
+        "void main()\n"
+        "{\n"
+        "   gl_Position = position;\n"
+        "}\n";
+     std::string fragmentShader =
+        "#version 330 core\n"
+        "\n"
+        "layout(location = 0) out vec4 color;\n"
+        "void main()\n"
+        "{\n"
+        "   color = vec4(1.0, 0.0, 0.0, 1.0);\n"
+        "}\n";
+        unsigned int shader = CreateShader(vertexShader, fragmentShader); // create shader from a string shader sources..
+        glUseProgram(shader); // tell gpu use this program as shader.
+        
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -80,6 +149,7 @@ int main(void)
         /* Poll for and process events */
         glfwPollEvents();
     }
+    glDeleteProgram(shader); // delete shader from gpu after you finish your job.
 
     glfwTerminate();
     return 0;
