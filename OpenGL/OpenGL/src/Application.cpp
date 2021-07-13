@@ -116,15 +116,19 @@ int main(void)
 
     std::cout << glGetString(GL_VERSION) << std::endl;
 
-    float positions[6]{
+    float positions[]{
         -0.5f,-0.5f, // 1th vertex pos,
-         0.0f, 0.5f, // 2th vertex pos,
-         0.5f,-0.5f, // 3th vertex pos,
+        -0.5f, 0.5f, // 2th vertex pos, // first triangle for square
+         0.5f, 0.5f, // 3th vertex pos,
+
+         0.5f, 0.5f,
+         0.5f,-0.5f,
+         -0.5f,-0.5f
     };
     unsigned int buffer;
     glGenBuffers(1, &buffer); // tell the gpu , generate a buffer with id of 1 .
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW); // look at to docs.gl adress to take more info.
+    glBufferData(GL_ARRAY_BUFFER, 6 *2 * sizeof(float), positions, GL_STATIC_DRAW); // look at to docs.gl adress to take more info.
 
     glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE, sizeof(float) * 2, 0); 
     // detailly  told in http://docs.gl/gl4/glVertexAttribPointer
@@ -167,7 +171,7 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3); // start from 0th element and read 3 element. Thought like
+        glDrawArrays(GL_TRIANGLES, 0, 6); // start from 0th element and read 3 element. Thought like
                                           // Every ordered position couple is a one vertex position element.
         
         /* Swap front and back buffers */
