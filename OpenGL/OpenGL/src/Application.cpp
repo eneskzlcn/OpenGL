@@ -117,20 +117,31 @@ int main(void)
     std::cout << glGetString(GL_VERSION) << std::endl;
 
     float positions[]{
-        -0.5f,-0.5f, // 1th vertex pos,
-        -0.5f, 0.5f, // 2th vertex pos, // first triangle for square
-         0.5f, 0.5f, // 3th vertex pos,
-
-         0.5f, 0.5f,
-         0.5f,-0.5f,
-         -0.5f,-0.5f
+        -0.5f,-0.5f, // 0th index for square
+        -0.5f, 0.5f, // 1th index for square
+         0.5f, 0.5f, // 2th index for square
+         0.5f,-0.5f, // 3th index for square
     };
+    unsigned int indices[]
+    {
+         0, 1 , 2, // needed position on indices for first triangle to draw square
+         2, 3, 0 // needed position on indices for second triangle to draw square
+    };
+
+    //adding positions as attiribute or sth.
     unsigned int buffer;
     glGenBuffers(1, &buffer); // tell the gpu , generate a buffer with id of 1 .
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glBufferData(GL_ARRAY_BUFFER, 6 *2 * sizeof(float), positions, GL_STATIC_DRAW); // look at to docs.gl adress to take more info.
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0); // detailly told in below.
+    glEnableVertexAttribArray(0); // we enable the vertex attribute. we need to do that.
 
-    glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE, sizeof(float) * 2, 0); 
+    unsigned int ibo; //index buffer object
+    glGenBuffers(1, &ibo); // tell the gpu , generate a buffer with id of 1 .
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(unsigned int), indices, GL_STATIC_DRAW); // look at to docs.gl adress to take more info.
+
+    //glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE, sizeof(float) * 2, 0);  Expression of this func. below -->
     // detailly  told in http://docs.gl/gl4/glVertexAttribPointer
     /*first parameter : index--> which attribute gonna modify.We have just three vertex positions JUST position attribute
         so, we just in the 0th atribute.
@@ -158,7 +169,7 @@ int main(void)
                 which is 8. But in our real example above we working on position attribute which is we just have so starting from 0
     */
 
-    glEnableVertexAttribArray(0); // we enable the vertex attribute. we need to do that.
+    
     
     //writing and adding shader
     
@@ -171,9 +182,8 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 6); // start from 0th element and read 3 element. Thought like
-                                          // Every ordered position couple is a one vertex position element.
-        
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        //2th param --> count of indices to be rendered.
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
