@@ -3,6 +3,28 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
+// ERROR HANLING AND DEBUGGING
+#define ASSERT(x) if(!(x)) __debugbreak();
+
+#define GLCALL(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall())
+
+static void GLClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+static bool GLLogCall()
+{
+    while (GLenum error = glGetError())
+    {
+        std::cout << "[OpenGL Error!] " << error << std::endl;
+        return false;
+    }
+    return true;
+}
+
 //this function takes a source and type as argument and compiles a shader from this source by given type.
 struct ShaderSource
 {
@@ -90,6 +112,7 @@ static unsigned int CreateShader(const std::string& vertexSource, const std::str
 
     return program;
 }
+
 
 int main(void)
 {
@@ -182,8 +205,13 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-        //2th param --> count of indices to be rendered.
+       // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+       //  //2th param --> count of indices to be rendered.
+       // 
+       // error handled draw
+        
+        GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
