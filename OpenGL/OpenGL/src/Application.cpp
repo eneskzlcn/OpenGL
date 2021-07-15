@@ -134,6 +134,8 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window); // we must call glewInit() after a valid opengl context created << what this func. provides.
 
+    glfwSwapInterval(1);
+
     if (glewInit() != GLEW_OK)
         std::cout << "Eroooor!" << std::endl;
 
@@ -145,6 +147,7 @@ int main(void)
          0.5f, 0.5f, // 2th index for square
          0.5f,-0.5f, // 3th index for square
     };
+    
     unsigned int indices[]
     {
          0, 1 , 2, // needed position on indices for first triangle to draw square
@@ -200,18 +203,35 @@ int main(void)
     unsigned int shader = CreateShader(source.vertexSource, source.fragmentSource); // create shader from a string shader sources..
     glUseProgram(shader); // tell gpu use this program as shader.
     /* Loop until the user closes the window */
+    GLCALL(int location = glGetUniformLocation(shader, "u_Color"));
+    ASSERT(location != -1);
+    float r = 0.2f;
+    float increment = 0.05f;
+
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-       // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-       //  //2th param --> count of indices to be rendered.
-       // 
-       // error handled draw
-        
+     
+       
+        //for animated color
+        GLCALL(glUniform4f(location, r, 0.2, 0.3, 0.5));
+
+        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+         //  //2th param --> count of indices to be rendered.
+         // 
+         // error handled draw
         GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
         
+        // for animated colors.
+        if (r >= 1.0f)
+            increment = -0.05f;
+        else if (r <= 0.0f)
+            increment = 0.05f;
+        
+        r += increment;
+
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
