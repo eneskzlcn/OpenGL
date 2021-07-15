@@ -3,10 +3,11 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+
+#include "VertexArray.h"
 //this function takes a source and type as argument and compiles a shader from this source by given type.
 
 
@@ -139,17 +140,13 @@ int main(void)
              0, 1 , 2, // needed position on indices for first triangle to draw square
              2, 3, 0 // needed position on indices for second triangle to draw square
         };
-
-        unsigned int vao;
-        GLCALL(glGenVertexArrays(1, &vao));
-        GLCALL(glBindVertexArray(vao));
-        //adding positions as attiribute or sth.
-
+        
+  
+        VertexArray va;
         VertexBuffer vb(positions, 4 * 2 * sizeof(float));
-
-
-        GLCALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0)); // detailly told in below.
-        GLCALL(glEnableVertexAttribArray(0)); // we enable the vertex attribute. we need to do that.
+        VertexBufferLayout vbl;
+        vbl.Push<float>(2);
+        va.AddBuffer(vb, vbl);
 
         IndexBuffer ib(indices, 6);
 
@@ -173,7 +170,7 @@ int main(void)
             GLCALL(glUseProgram(shader)); // tell gpu use this program as shader.
             //for animated color, do not forget that uniforms are works per draw. so before every draw you need to init them and then draw
             GLCALL(glUniform4f(location, r, 0.2, 0.3, 0.5));
-            GLCALL(glBindVertexArray(vao));
+          
             ib.Bind();
             // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
              //  //2th param --> count of indices to be rendered.
