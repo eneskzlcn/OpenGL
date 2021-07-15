@@ -215,7 +215,7 @@ int main(void)
 
      
        
-        //for animated color
+        //for animated color, do not forget that uniforms are works per draw. so before every draw you need to init them and then draw
         GLCALL(glUniform4f(location, r, 0.2, 0.3, 0.5));
 
         // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
