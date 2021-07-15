@@ -9,17 +9,18 @@
 
 #define GLCALL(x) GLClearError();\
     x;\
-    ASSERT(GLLogCall())
+    ASSERT(GLLogCall(#x, __FILE__ , __LINE__))
 
 static void GLClearError()
 {
     while (glGetError() != GL_NO_ERROR);
 }
-static bool GLLogCall()
+static bool GLLogCall(const char* function,const char * file, int line)
 {
     while (GLenum error = glGetError())
     {
-        std::cout << "[OpenGL Error!] " << error << std::endl;
+        std::cout << "[OpenGL Error!] (" << error << "): "<< function <<
+            " " << file << ": " << line  << std::endl;
         return false;
     }
     return true;
@@ -122,7 +123,9 @@ int main(void)
     if (!glfwInit())
         return -1;
     
-    
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
     if (!window)
@@ -153,19 +156,22 @@ int main(void)
          0, 1 , 2, // needed position on indices for first triangle to draw square
          2, 3, 0 // needed position on indices for second triangle to draw square
     };
-
+    
+    unsigned int vao;
+    GLCALL(glGenVertexArrays(1, &vao));
+    GLCALL(glBindVertexArray(vao));
     //adding positions as attiribute or sth.
     unsigned int buffer;
-    glGenBuffers(1, &buffer); // tell the gpu , generate a buffer with id of 1 .
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 *2 * sizeof(float), positions, GL_STATIC_DRAW); // look at to docs.gl adress to take more info.
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0); // detailly told in below.
-    glEnableVertexAttribArray(0); // we enable the vertex attribute. we need to do that.
+    GLCALL(glGenBuffers(1, &buffer)); // tell the gpu , generate a buffer with id of 1 .
+    GLCALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+    GLCALL(glBufferData(GL_ARRAY_BUFFER, 4 *2 * sizeof(float), positions, GL_STATIC_DRAW)); // look at to docs.gl adress to take more info.
+    GLCALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0)); // detailly told in below.
+    GLCALL(glEnableVertexAttribArray(0)); // we enable the vertex attribute. we need to do that.
 
     unsigned int ibo; //index buffer object
-    glGenBuffers(1, &ibo); // tell the gpu , generate a buffer with id of 1 .
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(unsigned int), indices, GL_STATIC_DRAW); // look at to docs.gl adress to take more info.
+    GLCALL(glGenBuffers(1, &ibo)); // tell the gpu , generate a buffer with id of 1 .
+    GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(unsigned int), indices, GL_STATIC_DRAW)); // look at to docs.gl adress to take more info.
 
     //glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE, sizeof(float) * 2, 0);  Expression of this func. below -->
     // detailly  told in http://docs.gl/gl4/glVertexAttribPointer
@@ -201,7 +207,7 @@ int main(void)
     
     ShaderSource source = ParseShader("res/shaders/Basic.shader");
     unsigned int shader = CreateShader(source.vertexSource, source.fragmentSource); // create shader from a string shader sources..
-    glUseProgram(shader); // tell gpu use this program as shader.
+    
     /* Loop until the user closes the window */
     GLCALL(int location = glGetUniformLocation(shader, "u_Color"));
     ASSERT(location != -1);
@@ -214,10 +220,11 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
      
-       
+        GLCALL(glUseProgram(shader)); // tell gpu use this program as shader.
         //for animated color, do not forget that uniforms are works per draw. so before every draw you need to init them and then draw
         GLCALL(glUniform4f(location, r, 0.2, 0.3, 0.5));
-
+        GLCALL(glBindVertexArray(vao));
+        GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
         // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
          //  //2th param --> count of indices to be rendered.
          // 
