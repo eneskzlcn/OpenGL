@@ -69,21 +69,16 @@ int main(void)
         IndexBuffer ib(indices, 6);
 
         glm::mat4 proj = glm::ortho(0.0f,960.0f,0.0f,540.0f,-1.0f,1.0f);
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0)); // instead of moving camera to left move other things to the right. That is how opengl works. Because there is no actual camera on opengl.
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));
 
-        /* run this code and look at result value. The x and y values wil be between -1 and 1
-        * which is the normalized coordinate values for pc to calculate rendering process.
-        * The projection both of ortho and perspective converts your own space coordinates
-        * to the normalized coordinates between -1 and 1 both of 3 coordinates to be rendered in.
-        
-        glm::vec4 vp(100.0f, 100.0f, 0.0f, 1.0f);
-
-        glm::vec4 result = vp * proj; //
-        */
-
+        glm::mat4 mvp = proj * view * model; // proj * view *model this ordering belongs to the opengl. In other apis like directx
+        // you need to do model*view*proj on this matrix multiplication.
+       
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
         //shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.2f, 0.5f);
-        shader.SetUniformMat4f("u_MVP", proj);
+        shader.SetUniformMat4f("u_MVP", mvp);
 
         va.UnBind();
         shader.UnBind();
