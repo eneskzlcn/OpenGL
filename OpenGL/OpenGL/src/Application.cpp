@@ -11,6 +11,8 @@
 #include "Texture.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw_gl3.h"
 //this function takes a source and type as argument and compiles a shader from this source by given type.
 
 
@@ -70,15 +72,13 @@ int main(void)
 
         glm::mat4 proj = glm::ortho(0.0f,960.0f,0.0f,540.0f,-1.0f,1.0f);
         glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0)); // instead of moving camera to left move other things to the right. That is how opengl works. Because there is no actual camera on opengl.
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));
+        
+        glm::vec3 translation(200, 200, 0);
 
-        glm::mat4 mvp = proj * view * model; // proj * view *model this ordering belongs to the opengl. In other apis like directx
-        // you need to do model*view*proj on this matrix multiplication.
-       
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
         //shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.2f, 0.5f);
-        shader.SetUniformMat4f("u_MVP", mvp);
+
 
         va.UnBind();
         shader.UnBind();
@@ -87,6 +87,15 @@ int main(void)
 
         Renderer renderer;
    
+        //initalize imgui
+        ImGui::CreateContext();
+        ImGui_ImplGlfwGL3_Init(window, true);
+        ImGui::StyleColorsDark();
+
+		bool show_demo_window = true;
+		bool show_another_window = false;
+		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
         float r = 0.2f;
         float increment = 0.05f;
 
@@ -96,10 +105,17 @@ int main(void)
 
         while (!glfwWindowShouldClose(window))
         {
-            glClear(GL_COLOR_BUFFER_BIT);
+            renderer.Clear();
 
-            shader.Bind();
-           // shader.SetUniform4f("u_Color", r, 0.3f, 0.2f, 0.5f);    
+            ImGui_ImplGlfwGL3_NewFrame();
+
+			glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+
+			glm::mat4 mvp = proj * view * model; // proj * view *model this ordering belongs to the opengl. In other apis like directx
+			// you need to do model*view*proj on this matrix multiplication.
+
+            shader.Bind();   
+            shader.SetUniformMat4f("u_MVP", mvp);
 
             renderer.Draw(va, ib, shader);
             
@@ -109,7 +125,16 @@ int main(void)
                 increment = 0.05f;
 
             r += increment;
+            
+            //ui imgui things
+			{
+				ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f);            // Edit 1 float using a slider from 0.0f to 1.0f    
+				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			}
 
+
+			ImGui::Render();
+			ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
 
@@ -117,6 +142,9 @@ int main(void)
             glfwPollEvents();
         }
     }
+	ImGui_ImplGlfwGL3_Shutdown();
+	ImGui::DestroyContext();
+
     glfwTerminate();
     return 0;
 }
