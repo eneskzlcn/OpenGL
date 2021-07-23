@@ -9,3 +9,7 @@ An Example Of Rendering Multiple SAME Textures By Just Changing Model Matrix
 An Example Of Changing Background Color With ImGui Color Edit Element
 
 ![](https://eneskzlcn.github.io/OpenGL/OpenGL/examples/changingBackgroundOnRuntime.gif)
+
+A Text Framework With ImGui Menu For Both Texture And Color Operations.
+
+![](https://eneskzlcn.github.io/OpenGL/OpenGL/examples/testFramework.gif)
