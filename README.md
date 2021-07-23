@@ -5,3 +5,7 @@ An Example Of Moving Texture Made By OpenGL and ImGui
 An Example Of Rendering Multiple SAME Textures By Just Changing Model Matrix
 
 ![](https://eneskzlcn.github.io/OpenGL/OpenGL/examples/renderingMultipleTextures.gif)
+
+An Example Of Changing Background Color With ImGui Color Edit Element
+
+![](https://eneskzlcn.github.io/OpenGL/OpenGL/examples/changingBackgroundOnRuntime.gif)
