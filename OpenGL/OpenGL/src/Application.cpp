@@ -15,10 +15,7 @@
 #include "imgui/imgui_impl_glfw_gl3.h"
 #include "tests/TestClearColor.h"
 #include "tests/TestTexture2D.h"
-//this function takes a source and type as argument and compiles a shader from this source by given type.
-
-
-
+#include "tests/TestBetchingSquares.h"
 
 int main(void)
 {
@@ -64,6 +61,7 @@ int main(void)
 
         testMenu->RegisterTest<test::TestClearColor>("Clear Color");
         testMenu->RegisterTest<test::TestTexture2D>("Texture");
+        testMenu->RegisterTest<test::TestBetchingSquares>("Batching");
         while (!glfwWindowShouldClose(window))
         {
             GLCALL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));

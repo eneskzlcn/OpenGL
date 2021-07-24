@@ -24,7 +24,7 @@ namespace test
 
 		unsigned int indices[]
 		{
-			 0, 1 , 2, // needed position on indices for first triangle to draw square
+			 0, 1 , 2,
 			 2, 3, 0 // needed position on indices for second triangle to draw square
 		};
 		GLCALL(glEnable(GL_BLEND));
